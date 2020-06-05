@@ -54,7 +54,6 @@ struct Board: Identifiable {
         if (abs(tiles[empty_tile_idx].x - x) + abs(tiles[empty_tile_idx].y - y) == 1){
             swapTileWithEmpty(tile_idx: idx)
         }
-        print(board_state == winning_state)
     }
     
     
