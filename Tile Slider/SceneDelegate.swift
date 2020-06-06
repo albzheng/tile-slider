@@ -25,9 +25,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Create the SwiftUI view and set the context as the value for the managedObjectContext environment keyPath.
         // Add `@Environment(\.managedObjectContext)` in the views that will need the context.
 
-        let games = GameStore()
-        let contentView = GameChooserView().environmentObject(games).environment(\.managedObjectContext, context)
-        //let contentView = GameView().environmentObject(game).environment(\.managedObjectContext, context)
+        let collection = Collection()
+        let albumManager = AlbumManager(collection: collection)
+        let contentView = CollectionView(albumManager: albumManager).environment(\.managedObjectContext, context)
+        //let games = GameStore()
+        //let contentView = GameChooserView().environmentObject(games).environment(\.managedObjectContext, context)
 
         // Use a UIHostingController as window root view controller.
         if let windowScene = scene as? UIWindowScene {

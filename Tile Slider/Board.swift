@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import AVFoundation
 
 
 struct Board: Identifiable {
@@ -67,6 +68,9 @@ struct Board: Identifiable {
         tiles[empty_tile_idx].y = tiles[idx].y
         tiles[idx].x = empty_x
         tiles[idx].y = empty_y
+        
+        let soundId = [1155,1156].randomElement()!
+        AudioServicesPlaySystemSound (SystemSoundID(soundId))
     }
 }
 

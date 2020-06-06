@@ -33,7 +33,10 @@ struct GameSelectionView: View {
     
     var body: some View {
         HStack{
-            Image(board.imageTitle).resizable().frame(width: 80, height: 80).padding()
+            Image(board.imageTitle)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 80, height: 80).padding()
             Text(board.title)
         }
     }

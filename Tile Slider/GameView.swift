@@ -16,7 +16,6 @@ struct GameView: View {
         VStack(spacing: 10){
             Text(game.board.title).font(.title)
             BoardView()
-            
                 .aspectRatio(CGFloat(game.board.num_cols/game.board.num_rows), contentMode: .fit)
                 .padding(.horizontal, 50)
             Button(action: {
@@ -28,7 +27,7 @@ struct GameView: View {
             Alert(
                 title: Text("Restart Game"),
                 message: Text("Are you sure you want to restart the game?"),
-                primaryButton: .default(Text("Yes")) {self.game.newGame()},
+                primaryButton: .default(Text("Yes")) {withAnimation {self.game.newGame()}},
                 secondaryButton: .cancel()
             )
         }
@@ -70,20 +69,22 @@ struct BoardView: View{
             let x = game.board.tiles[draggedTileIdx].x
             let y = game.board.tiles[draggedTileIdx].y
             
-            if game.board.tiles[game.board.empty_tile_idx].x - x == 1 {
-                min_drag_x = 0
-                max_drag_x = tile_width
-            }else if game.board.tiles[game.board.empty_tile_idx].x - x == -1 {
-                min_drag_x = -tile_width
-                max_drag_x = 0
-            }
-            
-            if game.board.tiles[game.board.empty_tile_idx].y - y == 1 {
-                min_drag_y = 0
-                max_drag_y = tile_height
-            }else if game.board.tiles[game.board.empty_tile_idx].y - y == -1 {
-                min_drag_y = -tile_height
-                max_drag_y = 0
+            if abs(game.board.tiles[game.board.empty_tile_idx].x - x) + abs(game.board.tiles[game.board.empty_tile_idx].y - y) == 1 {
+                if game.board.tiles[game.board.empty_tile_idx].x - x == 1 {
+                    min_drag_x = 0
+                    max_drag_x = tile_width
+                }else if game.board.tiles[game.board.empty_tile_idx].x - x == -1 {
+                    min_drag_x = -tile_width
+                    max_drag_x = 0
+                }
+                
+                if game.board.tiles[game.board.empty_tile_idx].y - y == 1 {
+                    min_drag_y = 0
+                    max_drag_y = tile_height
+                }else if game.board.tiles[game.board.empty_tile_idx].y - y == -1 {
+                    min_drag_y = -tile_height
+                    max_drag_y = 0
+                }
             }
         }
         
@@ -99,16 +100,19 @@ struct BoardView: View{
             ForEach(game.board.tiles) { tile in
                 if tile.id > 0 {
                     TileView(tile: tile)
-                            .frame(width: CGFloat(tile_width), height: CGFloat(tile_height))
-                            .position(x: tile.id == self.draggedTileId ? CGFloat(Float(tile.x) * tile_width + x_offset + min(max(Float(self.gesturePanOffset.width),min_drag_x),max_drag_x)): CGFloat(Float(tile.x) * tile_width + x_offset),
-                                      y: tile.id == self.draggedTileId ? CGFloat(Float(tile.y) * tile_height + y_offset + min(max(Float(self.gesturePanOffset.height),min_drag_y),max_drag_y)): CGFloat(Float(tile.y) * tile_height + y_offset))
+                        .frame(width: CGFloat(tile_width), height: CGFloat(tile_height))
+                        .position(x: tile.id == self.draggedTileId ? CGFloat(Float(tile.x) * tile_width + x_offset +                    min(max(Float(self.gesturePanOffset.width),min_drag_x),max_drag_x)): CGFloat(Float(tile.x) * tile_width + x_offset),
+                                  y: tile.id == self.draggedTileId ? CGFloat(Float(tile.y) * tile_height + y_offset + min(max(Float(self.gesturePanOffset.height),min_drag_y),max_drag_y)): CGFloat(Float(tile.y) * tile_height + y_offset))
                         .gesture(self.panGesture(tile: tile, tileWidth: tile_width, tileHeight: tile_height))
-                            .onTapGesture {
-                                print("Clicked")
-                                let idx = self.game.board.tiles.firstIndex(matching: tile)!
-                                self.game.board.moveTile(idx)}
+                        .onTapGesture {
+                            print("Clicked")
+                            let idx = self.game.board.tiles.firstIndex(matching: tile)!
+                            withAnimation (.easeInOut(duration: 0.25)) {
+                                self.game.board.moveTile(idx)
+                            }
+                        }
                             
-                            .animation(.easeInOut(duration: 0.3))
+                            
                 } else if tile.id < 0 {
                     Rectangle()
                         .frame(width: CGFloat(tile_width), height: CGFloat(tile_height))
@@ -149,7 +153,6 @@ struct BoardView: View{
                     self.game.board.moveTile(draggedTileIdx)
                 }
             }
-            
             if self.game.board.tiles[self.game.board.empty_tile_idx].y - y == 1 {
                 if Float(finalDragGestureValue.predictedEndTranslation.height) > tileHeight/2 {
                     self.game.board.moveTile(draggedTileIdx)
