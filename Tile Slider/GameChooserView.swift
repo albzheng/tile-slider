@@ -16,7 +16,7 @@ struct GameChooserView: View {
             List() {
                 ForEach(games.boardCollection){ board in
                     NavigationLink(destination: GameView().environmentObject(Game(board: board))
-                        .navigationBarTitle(board.title)
+                        //.navigationBarTitle(board.title)
                     ){
                         GameSelectionView(board: board)
                     }

@@ -7,10 +7,17 @@
 //
 
 import SwiftUI
+import Combine
+import AVFoundation
+
 
 struct GameView: View {
     @EnvironmentObject var game: Game
+    @EnvironmentObject var albumManager: AlbumManager
+    
     @State var newGame: Bool = false
+    @State var winGamePublisher: AnyCancellable? = nil
+    
     
     var body: some View {
         VStack(spacing: 10){
@@ -18,26 +25,44 @@ struct GameView: View {
             BoardView()
                 .aspectRatio(CGFloat(game.board.num_cols/game.board.num_rows), contentMode: .fit)
                 .padding(.horizontal, 50)
+                .alert(isPresented: self.$game.won){
+                    return Alert(title: Text("Congratulations!"),
+                          message: Text("You solved the puzzle! It has been added to your Collection."),
+                          dismissButton: .default(Text("Done")))
+                }
             Button(action: {
                 self.newGame = true
+                self.albumManager.addItem(item: self.game.board.imageTitle)
             }, label: {
                 Text("New Game").font(.system(.body, design: .rounded))
             })
-        }.alert(isPresented: self.$newGame) {
-            Alert(
-                title: Text("Restart Game"),
-                message: Text("Are you sure you want to restart the game?"),
-                primaryButton: .default(Text("Yes")) {withAnimation {self.game.newGame()}},
-                secondaryButton: .cancel()
-            )
+            .alert(isPresented: self.$newGame) {
+                Alert(
+                    title: Text("Restart Game"),
+                    message: Text("Are you sure you want to restart the game?"),
+                    primaryButton: .default(Text("Yes")) {withAnimation {self.game.newGame()}},
+                    secondaryButton: .cancel()
+                )
+            }
         }
+        .onAppear(perform: {
+            self.winGamePublisher = self.game.$won.sink{ won in
+                if won {
+                    self.albumManager.addItem(item: self.game.board.imageTitle)
+                }
+            }
+        })
     }
 }
 
 
 struct BoardView: View{
     @EnvironmentObject var game: Game
+    @EnvironmentObject var settings: Settings
+    @Environment(\.colorScheme) var colorScheme
     @State var draggedTileId: Int = 1000
+    
+    let soundId = [1155,1156]
     
     var body: some View{
         GeometryReader {geometry in
@@ -53,6 +78,7 @@ struct BoardView: View{
         let x_offset: Float = tile_width / 2
         let y_offset: Float = tile_height / 2
         
+        //Identify the horizontal and vertical bounds for a tile to be dragged
         var min_drag_x: Float = 0.0
         var min_drag_y: Float = 0.0
         var max_drag_x: Float = 0.0
@@ -90,13 +116,17 @@ struct BoardView: View{
         
         
         return ZStack{
+            
             Rectangle()
                .foregroundColor(Color.gray)
                .zIndex(-2)
+            /*
             Rectangle()
                 .stroke(lineWidth: 4)
                 .foregroundColor(Color.gray)
                 .zIndex(-2)
+ */
+             
             ForEach(game.board.tiles) { tile in
                 if tile.id > 0 {
                     TileView(tile: tile)
@@ -108,7 +138,13 @@ struct BoardView: View{
                             print("Clicked")
                             let idx = self.game.board.tiles.firstIndex(matching: tile)!
                             withAnimation (.easeInOut(duration: 0.25)) {
-                                self.game.board.moveTile(idx)
+                                self.game.moveTile(idx)
+                                if self.settings.sound {
+                                    AudioServicesPlaySystemSound(SystemSoundID(self.soundId.randomElement()!))
+                                }
+                                if self.settings.vibration {
+                                    AudioServicesPlaySystemSound(1519)
+                                }
                             }
                         }
                             
@@ -117,7 +153,7 @@ struct BoardView: View{
                     Rectangle()
                         .frame(width: CGFloat(tile_width), height: CGFloat(tile_height))
                         .position(x: CGFloat(Float(tile.x) * tile_width + x_offset), y: CGFloat(Float(tile.y) * tile_height + y_offset))
-                        .foregroundColor(Color.white)
+                        .foregroundColor(self.colorScheme == .dark ? Color.black : Color.white)
                         .zIndex(-1)
                 }
             }
@@ -141,25 +177,50 @@ struct BoardView: View{
                 }
             }
             
+            
             let x = self.game.board.tiles[draggedTileIdx].x
             let y = self.game.board.tiles[draggedTileIdx].y
             
             if self.game.board.tiles[self.game.board.empty_tile_idx].x - x == 1 {
                 if Float(finalDragGestureValue.predictedEndTranslation.width) > tileWidth/2 {
-                    self.game.board.moveTile(draggedTileIdx)
+                    self.game.moveTile(draggedTileIdx)
+                    if self.settings.sound {
+                        AudioServicesPlaySystemSound(SystemSoundID(self.soundId.randomElement()!))
+                    }
+                    if self.settings.vibration {
+                        AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
+                    }
                 }
             } else if self.game.board.tiles[self.game.board.empty_tile_idx].x - x == -1 {
                 if Float(finalDragGestureValue.predictedEndTranslation.width) < -tileWidth/2 {
-                    self.game.board.moveTile(draggedTileIdx)
+                    self.game.moveTile(draggedTileIdx)
+                    if self.settings.sound {
+                        AudioServicesPlaySystemSound(SystemSoundID(self.soundId.randomElement()!))
+                    }
+                    if self.settings.vibration {
+                        AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
+                    }
                 }
             }
             if self.game.board.tiles[self.game.board.empty_tile_idx].y - y == 1 {
                 if Float(finalDragGestureValue.predictedEndTranslation.height) > tileHeight/2 {
-                    self.game.board.moveTile(draggedTileIdx)
+                    self.game.moveTile(draggedTileIdx)
+                    if self.settings.sound {
+                        AudioServicesPlaySystemSound(SystemSoundID(self.soundId.randomElement()!))
+                    }
+                    if self.settings.vibration {
+                        AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
+                    }
                 }
             }else if self.game.board.tiles[self.game.board.empty_tile_idx].y - y == -1 {
                 if Float(finalDragGestureValue.predictedEndTranslation.height) < -tileHeight/2 {
-                    self.game.board.moveTile(draggedTileIdx)
+                    self.game.moveTile(draggedTileIdx)
+                    if self.settings.sound {
+                        AudioServicesPlaySystemSound(SystemSoundID(self.soundId.randomElement()!))
+                    }
+                    if self.settings.vibration {
+                        AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
+                    }
                 }
             }
             self.draggedTileId = 1000

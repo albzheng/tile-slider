@@ -10,13 +10,14 @@ import SwiftUI
 
 class Game: ObservableObject {
     @Published var board: Board
+    @Published var won: Bool = false
     
     init (board: Board){
         self.board = board
     }
     
     func newGame(){
-        self.board.board_state = self.board.winning_state
+        self.board.board_state = self.board.initial_state
         self.board.tiles = []
         for row in 0..<self.board.num_rows {
             for col in 0..<self.board.num_cols {
@@ -25,4 +26,11 @@ class Game: ObservableObject {
         }
     }
     
+    func moveTile(_ idx: Int){
+        board.moveTile(idx)
+        if board.board_state == board.winning_state {
+            print("Won")
+            self.won = true
+        }
+    }
 }

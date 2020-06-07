@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import AVFoundation
 
 
 struct Board: Identifiable {
@@ -17,26 +16,34 @@ struct Board: Identifiable {
     var num_rows: Int
     var num_cols: Int
     var board_state: [[Int]]
+    let initial_state: [[Int]]
     let winning_state: [[Int]]
     
     var tiles: [Tile]
     
     //TO DO
     var empty_tile_idx: Int {
-        tiles.count - 1
+        var idx = 0
+        for i in 0..<tiles.count {
+            if tiles[i].id == 0 {
+                idx = i
+            }
+        }
+        return idx
     }
     var won: Bool {
         board_state == winning_state
     }
     
     
-    init (title: String, id: Int, imageTitle: String, num_rows: Int, num_cols: Int, board_state: [[Int]], winning_state: [[Int]]){
+    init (title: String, id: Int, imageTitle: String, num_rows: Int, num_cols: Int, board_state: [[Int]], initial_state: [[Int]], winning_state: [[Int]]){
         self.title = title
         self.id = id
         self.imageTitle = imageTitle
         self.num_rows = num_rows
         self.num_cols = num_cols
         self.board_state = board_state
+        self.initial_state = initial_state
         self.winning_state = winning_state
         self.tiles = []
         
@@ -68,9 +75,6 @@ struct Board: Identifiable {
         tiles[empty_tile_idx].y = tiles[idx].y
         tiles[idx].x = empty_x
         tiles[idx].y = empty_y
-        
-        let soundId = [1155,1156].randomElement()!
-        AudioServicesPlaySystemSound (SystemSoundID(soundId))
     }
 }
 

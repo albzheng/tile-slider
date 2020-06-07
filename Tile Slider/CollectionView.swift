@@ -73,18 +73,22 @@ struct CollectionView_Previews: PreviewProvider {
 */
 
 struct CollectionView: View {
-    @ObservedObject var albumManager: AlbumManager
+    @EnvironmentObject var albumManager: AlbumManager
     
     var body: some View {
         GeometryReader {geometry in
             VStack (){
                 Text ("Completed Puzzles").font(.largeTitle).padding(.top, 20)
-                ScrollView (.vertical) {
-                    VStack {
-                        ForEach (1...self.albumManager.rows, id: \.self) {row in
-                            CollectionRowView(collection: self.$albumManager.collection, numCols: self.albumManager.cols, row: row, size: geometry.size)
+                if self.albumManager.collection.items.count > 0 {
+                    ScrollView (.vertical) {
+                        VStack {
+                            ForEach (1...self.albumManager.rows, id: \.self) {row in
+                                CollectionRowView(collection: self.$albumManager.collection, numCols: self.albumManager.cols, row: row, size: geometry.size)
+                            }
                         }
                     }
+                } else {
+                    Spacer()
                 }
             }
         }
@@ -127,8 +131,6 @@ struct CollectionRowView: View {
 
 struct CollectionView_Previews: PreviewProvider {
     static var previews: some View {
-        let collection = Collection()
-        let albumManager = AlbumManager(collection: collection)
-        return CollectionView(albumManager: albumManager)
+        return CollectionView().environmentObject(AlbumManager())
     }
 }

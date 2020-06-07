@@ -8,7 +8,30 @@
 
 import Foundation
 
-struct Collection{
-    var items = ["Charmandar","Bulb","Squirtle","Bulb","Charmandar","Bulb","Squirtle","Bulb","Charmandar","Bulb","Charmandar","Bulb","Charmandar","Bulb","Squirtle","Bulb","Charmandar","Bulb","Squirtle","Bulb","Charmandar","Bulb","Charmandar"]
-    //var items = ["0","1","2","3","4","5","6","7","8","9","10","11"]
+struct Collection: Codable{
+    var items: Array<String> = []
+    //var items = ["Charmandar","Bulb","Squirtle","Bulb","Charmandar","Bulb","Squirtle","Bulb","Charmandar","Bulb","Charmandar","Bulb","Charmandar","Bulb","Squirtle","Bulb","Charmandar","Bulb","Squirtle","Bulb"]
+    
+    var json: Data? {
+        return try? JSONEncoder().encode(self)
+    }
+    
+    init? (json:Data?) {
+        if json != nil, let newCollection = try? JSONDecoder().decode(Collection.self, from: json!) {
+            self = newCollection
+        } else {
+            return nil
+        }
+    }
+    
+    init() {
+        self.items = []
+    }
+    
+    mutating func addItem(item: String) {
+        if !items.contains(item){
+            items.append(item)
+            print("Adding " + item + " to collection.")
+        }
+    }
 }
