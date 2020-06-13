@@ -23,7 +23,6 @@ struct GameChooserView: View {
                 }
             }
             .navigationBarTitle("Game Selection")
-            //.environment(\.defaultMinListRowHeight, 80)
         }
     }
 }

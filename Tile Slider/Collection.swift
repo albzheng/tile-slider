@@ -10,11 +10,12 @@ import Foundation
 
 struct Collection: Codable{
     var items: Array<String> = []
-    //var items = ["Charmandar","Bulb","Squirtle","Bulb","Charmandar","Bulb","Squirtle","Bulb","Charmandar","Bulb","Charmandar","Bulb","Charmandar","Bulb","Squirtle","Bulb","Charmandar","Bulb","Squirtle","Bulb"]
+    
     
     var json: Data? {
         return try? JSONEncoder().encode(self)
     }
+    
     
     init? (json:Data?) {
         if json != nil, let newCollection = try? JSONDecoder().decode(Collection.self, from: json!) {
@@ -24,9 +25,11 @@ struct Collection: Codable{
         }
     }
     
+    
     init() {
         self.items = []
     }
+    
     
     mutating func addItem(item: String) {
         if !items.contains(item){

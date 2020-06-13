@@ -11,9 +11,9 @@ import SwiftUI
 class GameStore: ObservableObject{
     let boardCollection = [
         Board(title: "Bulbasaur", id: 1, imageTitle: "Bulb", num_rows: 4, num_cols: 4,
-              board_state: [[-1,2,3,-2],[5,6,7,8],[9,10,11,12],[-3,14,0,15]],
-              initial_state: [[-1,2,3,-2],[5,6,7,8],[9,10,11,12],[-3,14,0,15]],
-              winning_state: [[-1,2,3,-2],[5,6,7,8],[9,10,11,12],[-3,14,15,0]]),
+              board_state: [[-1,2,3,-2],[5,6,7,8],[9,10,11,12],[-3,0,14,-4]],
+              initial_state: [[-1,2,3,-2],[5,6,7,8],[9,10,11,12],[-3,0,14,-4]],
+              winning_state: [[-1,2,3,-2],[5,6,7,8],[9,10,11,12],[-3,14,0,-4]]),
         Board(title: "Charmandar", id: 2, imageTitle: "Charmandar", num_rows: 3, num_cols: 3,
               board_state: [[1,2,3],[4,5,6],[7,0,8]],
               initial_state: [[1,2,3],[4,5,6],[7,0,8]],

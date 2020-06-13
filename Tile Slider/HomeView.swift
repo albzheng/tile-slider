@@ -48,41 +48,8 @@ struct HomeView: View {
                 }
             }
         }.sheet(isPresented: $showSettings){
-            settingsView().environmentObject(self.settings)
+            SettingsView().environmentObject(self.settings)
         }
-    }
-}
-
-
-struct settingsView: View {
-    @EnvironmentObject var settings: Settings
-    @State private var name: String = ""
-    
-    var body: some View {
-        VStack(spacing: 0){
-            Text("Settings").font(.headline).padding()
-            Form {
-                Section {
-                    Toggle(isOn: self.$settings.sound) {
-                        Text("Sound")
-                    }
-                    Toggle(isOn: self.$settings.vibration) {
-                        Text("Vibration")
-                    }
-                }
-                Section {
-                    HStack {
-                        Text("Username: ")
-                        TextField("Name", text: $name, onEditingChanged: { began in
-                            if !began {
-                                self.settings.userName = self.name
-                            }
-                        })
-                    }
-                }
-            }
-        }
-            .onAppear { self.name = self.settings.userName}
     }
 }
 
@@ -95,6 +62,7 @@ struct TitleBackground: View {
         }
     }
 }
+
 
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
